@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soraka Mastery Clicker</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background: url('https://images3.alphacoders.com/129/1291921.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
+        #overlay {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        #character {
+            width: 500px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            animation: float 2s infinite alternate ease-in-out;
+        }
+        #character:active {
+            transform: scale(0.9);
+        }
+        @keyframes float {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-10px); }
+        }
+        .button {
+            background-color: #0055aa;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        .progress-container {
+            width: 300px;
+            background: #222;
+            border-radius: 10px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 20px;
+            width: 0%;
+            background: #0055aa;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <h1>Soraka Mastery Clicker</h1>
+        <h2>Mastery Points: <span id="points">0</span></h2>
+        <h2>Level: <span id="level">0</span></h2>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <img id="character" src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_0.jpg" alt="Soraka" onclick="addPoints()">
+        <br>
+        <button class="button" onclick="buyUpgrade()">Upgrade Click (Cost: <span id="upgradeCost">10</span> MP)</button>
+        <button class="button" onclick="buyMultiplier()">Upgrade Multiplier (Cost: <span id="multiplierCost">50</span> MP)</button>
+        <button class="button" onclick="buyAutoClicker()">Auto Clicker (Cost: <span id="autoClickerCost">200</span> MP)</button>
+        <button class="button" onclick="buyBonus()">Bonus Boost (Cost: <span id="bonusCost">500</span> MP)</button>
+        <button class="button" onclick="saveScore()">Punkte Speichern</button>
+    </div>
+    
+    <script>
+        let points = 0;
+        let perClick = 1;
+        let multiplier = 1;
+        let autoClicker = 0;
+        let upgradeCost = 10;
+        let multiplierCost = 50;
+        let autoClickerCost = 200;
+        let bonusCost = 500;
+        let level = 0;
+        let nextLevelPoints = 50000;
+
+        const skins = [
+            "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_0.jpg",
+            "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_1.jpg",
+            "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_2.jpg",
+            "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_3.jpg",
+            "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_4.jpg",
+            "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_5.jpg",
+            "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_6.jpg",
+            "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Soraka_7.jpg"
+        ];
+
+        function addPoints() {
+            points += perClick * multiplier;
+            document.getElementById("points").innerText = points;
+            updateProgressBar();
+            checkLevelUp();
+        }
+
+        function checkLevelUp() {
+            while (points >= nextLevelPoints) {
+                level++;
+                points -= nextLevelPoints;
+                nextLevelPoints *= 2;
+                document.getElementById("level").innerText = level;
+                document.getElementById("character").src = skins[level % skins.length];
+            }
+            updateUI();
+        }
+        
+        function buyUpgrade() {
+            if (points >= upgradeCost) {
+                points -= upgradeCost;
+                perClick++;
+                upgradeCost = Math.floor(upgradeCost * 1.5);
+                updateUI();
+            }
+        }
+
+        function buyMultiplier() {
+            if (points >= multiplierCost) {
+                points -= multiplierCost;
+                multiplier++;
+                multiplierCost = Math.floor(multiplierCost * 2);
+                updateUI();
+            }
+        }
+
+        function buyAutoClicker() {
+            if (points >= autoClickerCost) {
+                points -= autoClickerCost;
+                autoClicker++;
+                autoClickerCost = Math.floor(autoClickerCost * 2);
+                updateUI();
+            }
+        }
+
+        function buyBonus() {
+            if (points >= bonusCost) {
+                points -= bonusCost;
+                perClick += 5;
+                bonusCost = Math.floor(bonusCost * 2);
+                updateUI();
+            }
+        }
+        
+        function updateProgressBar() {
+            let levelProgress = (points % nextLevelPoints) / nextLevelPoints * 100;
+            document.getElementById("progress-bar").style.width = Math.min(levelProgress, 100) + "%";
+        }
+        
+        function updateUI() {
+            document.getElementById("points").innerText = points;
+            document.getElementById("upgradeCost").innerText = upgradeCost;
+            document.getElementById("multiplierCost").innerText = multiplierCost;
+            document.getElementById("autoClickerCost").innerText = autoClickerCost;
+            document.getElementById("bonusCost").innerText = bonusCost;
+            document.getElementById("level").innerText = level;
+            updateProgressBar();
+        }
+
+        function saveScore() {
+            localStorage.setItem('points', points);
+            localStorage.setItem('perClick', perClick);
+            localStorage.setItem('multiplier', multiplier);
+            localStorage.setItem('autoClicker', autoClicker);
+            localStorage.setItem('upgradeCost', upgradeCost);
+            localStorage.setItem('multiplierCost', multiplierCost);
+            localStorage.setItem('autoClickerCost', autoClickerCost);
+            localStorage.setItem('bonusCost', bonusCost);
+            localStorage.setItem('level', level);
+            localStorage.setItem('nextLevelPoints', nextLevelPoints);
+        }
+
+        function loadScore() {
+            points = parseInt(localStorage.getItem('points')) || 0;
+            perClick = parseInt(localStorage.getItem('perClick')) || 1;
+            multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
+            autoClicker = parseInt(localStorage.getItem('autoClicker')) || 0;
+            upgradeCost = parseInt(localStorage.getItem('upgradeCost')) || 10;
+            multiplierCost = parseInt(localStorage.getItem('multiplierCost')) || 50;
+            autoClickerCost = parseInt(localStorage.getItem('autoClickerCost')) || 200;
+            bonusCost = parseInt(localStorage.getItem('bonusCost')) || 500;
+            level = parseInt(localStorage.getItem('level')) || 0;
+            nextLevelPoints = parseInt(localStorage.getItem('nextLevelPoints')) || 50000;
+            document.getElementById("character").src = skins[level % skins.length];
+            updateUI();
+        }
+        
+        setInterval(() => {
+            if (autoClicker > 0) {
+                addPoints();
+            }
+        }, 1000);
+
+        // Lade die Punkte beim Start der Seite
+        document.addEventListener("DOMContentLoaded", loadScore);
+
+        // Speichere die Punkte alle 3 Sekunden automatisch
+        setInterval(saveScore, 3000);
+    </script>
+</body>
+</html>
